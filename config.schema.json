@@ -1,5 +1,5 @@
 {
-  "pluginAlias": "ExampleHomebridgePlugin",
+  "pluginAlias": "YamahaYAS209",
   "pluginType": "platform",
   "singular": true,
   "schema": {
@@ -9,7 +9,13 @@
         "title": "Name",
         "type": "string",
         "required": true,
-        "default": "Example Dynamic Platform"
+        "default": "Yamaha YAS-209"
+      },
+      "ip": {
+        "title": "IP Address",
+        "type": "string",
+        "required": true,
+        "default": ""
       }
     }
   }
