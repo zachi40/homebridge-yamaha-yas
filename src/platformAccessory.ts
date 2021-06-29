@@ -1,141 +1,101 @@
-import { Service, PlatformAccessory, CharacteristicValue } from 'homebridge';
+import { Service, PlatformAccessory } from 'homebridge';
+import { YamahaYAS209Platform } from './platform';
+import { YamahaAVAPI } from './yamahaAPI';
 
-import { ExampleHomebridgePlatform } from './platform';
-
-/**
- * Platform Accessory
- * An instance of this class is created for each accessory your platform registers
- * Each accessory may expose multiple services of different service types.
- */
-export class ExamplePlatformAccessory {
+export class YamahaReciver {
   private service: Service;
+  private readonly platform: YamahaYAS209Platform;
+  private readonly accessory: PlatformAccessory;
 
-  /**
-   * These are just used to create a working example
-   * You should implement your own code to track the state of your accessory
-   */
-  private exampleStates = {
-    On: false,
-    Brightness: 100,
-  };
-
-  constructor(
-    private readonly platform: ExampleHomebridgePlatform,
-    private readonly accessory: PlatformAccessory,
-  ) {
+  constructor(platform, accessory) {
+    this.platform = platform;
+    this.accessory = accessory;
 
     // set accessory information
     this.accessory.getService(this.platform.Service.AccessoryInformation)!
-      .setCharacteristic(this.platform.Characteristic.Manufacturer, 'Default-Manufacturer')
-      .setCharacteristic(this.platform.Characteristic.Model, 'Default-Model')
-      .setCharacteristic(this.platform.Characteristic.SerialNumber, 'Default-Serial');
+      .setCharacteristic(this.platform.Characteristic.Manufacturer, 'Yamaha')
+      .setCharacteristic(this.platform.Characteristic.Model, 'YAS-209')
+      .setCharacteristic(this.platform.Characteristic.SerialNumber, 'e0b5fbae-d894-11eb-b8bc-0242ac130003');
 
-    // get the LightBulb service if it exists, otherwise create a new LightBulb service
+    // get the TelevisionSpeaker service if it exists, otherwise create a new TelevisionSpeaker service
     // you can create multiple services for each accessory
-    this.service = this.accessory.getService(this.platform.Service.Lightbulb) || this.accessory.addService(this.platform.Service.Lightbulb);
+    this.service = this.accessory.getService(this.platform.Service.Television) ||
+                    this.accessory.addService(this.platform.Service.Television);
 
     // set the service name, this is what is displayed as the default name on the Home app
     // in this example we are using the name we stored in the `accessory.context` in the `discoverDevices` method.
-    this.service.setCharacteristic(this.platform.Characteristic.Name, accessory.context.device.exampleDisplayName);
+    this.service.setCharacteristic(this.platform.Characteristic.Name, accessory.context.device.displayName);
 
     // each service must implement at-minimum the "required characteristics" for the given service type
     // see https://developers.homebridge.io/#/service/Lightbulb
 
-    // register handlers for the On/Off Characteristic
+    // Create handlers for required characteristics.
     this.service.getCharacteristic(this.platform.Characteristic.On)
-      .onSet(this.setOn.bind(this))                // SET - bind to the `setOn` method below
-      .onGet(this.getOn.bind(this));               // GET - bind to the `getOn` method below
+      .on('get', this.handleOnGet.bind(this))
+      .on('set', this.handleOnSet.bind(this));
 
-    // register handlers for the Brightness Characteristic
-    this.service.getCharacteristic(this.platform.Characteristic.Brightness)
-      .onSet(this.setBrightness.bind(this));       // SET - bind to the 'setBrightness` method below
-
-    /**
-     * Creating multiple services of the same type.
-     *
-     * To avoid "Cannot add a Service with the same UUID another Service without also defining a unique 'subtype' property." error,
-     * when creating multiple services of the same type, you need to use the following syntax to specify a name and subtype id:
-     * this.accessory.getService('NAME') || this.accessory.addService(this.platform.Service.Lightbulb, 'NAME', 'USER_DEFINED_SUBTYPE_ID');
-     *
-     * The USER_DEFINED_SUBTYPE must be unique to the platform accessory (if you platform exposes multiple accessories, each accessory
-     * can use the same sub type id.)
-     */
-
-    // Example: add two "motion sensor" services to the accessory
-    const motionSensorOneService = this.accessory.getService('Motion Sensor One Name') ||
-      this.accessory.addService(this.platform.Service.MotionSensor, 'Motion Sensor One Name', 'YourUniqueIdentifier-1');
-
-    const motionSensorTwoService = this.accessory.getService('Motion Sensor Two Name') ||
-      this.accessory.addService(this.platform.Service.MotionSensor, 'Motion Sensor Two Name', 'YourUniqueIdentifier-2');
-
-    /**
-     * Updating characteristics values asynchronously.
-     *
-     * Example showing how to update the state of a Characteristic asynchronously instead
-     * of using the `on('get')` handlers.
-     * Here we change update the motion sensor trigger states on and off every 10 seconds
-     * the `updateCharacteristic` method.
-     *
-     */
-    let motionDetected = false;
-    setInterval(() => {
-      // EXAMPLE - inverse the trigger
-      motionDetected = !motionDetected;
-
-      // push the new value to HomeKit
-      motionSensorOneService.updateCharacteristic(this.platform.Characteristic.MotionDetected, motionDetected);
-      motionSensorTwoService.updateCharacteristic(this.platform.Characteristic.MotionDetected, !motionDetected);
-
-      this.platform.log.debug('Triggering motionSensorOneService:', motionDetected);
-      this.platform.log.debug('Triggering motionSensorTwoService:', !motionDetected);
-    }, 10000);
+    // Create handlers for optional characteristics.
+    this.service.getCharacteristic(this.platform.Characteristic.RotationSpeed)
+      .on('get', this.handleRotationSpeedGet.bind(this))
+      .on('set', this.handleRotationSpeedSet.bind(this));
   }
 
   /**
-   * Handle "SET" requests from HomeKit
-   * These are sent when the user changes the state of an accessory, for example, turning on a Light bulb.
+   * Handle requests to get the current value of the "On" characteristic.
    */
-  async setOn(value: CharacteristicValue) {
-    // implement your own code to turn your device on/off
-    this.exampleStates.On = value as boolean;
+  handleOnGet(callback) {
+    this.platform.log.debug('Triggered GET On');
 
-    this.platform.log.debug('Set Characteristic On ->', value);
+    // this.platform.yamahaAVRAPI.postReceiverGetAction(YamahaAction.POWER, this.isZoneB).then((answer: string) => {
+    //   callback(null, answer === YamahaActionValue.ON);
+    // });
   }
 
   /**
-   * Handle the "GET" requests from HomeKit
-   * These are sent when HomeKit wants to know the current state of the accessory, for example, checking if a Light bulb is on.
-   *
-   * GET requests should return as fast as possbile. A long delay here will result in
-   * HomeKit being unresponsive and a bad user experience in general.
-   *
-   * If your device takes time to respond you should update the status of your device
-   * asynchronously instead using the `updateCharacteristic` method instead.
-
-   * @example
-   * this.service.updateCharacteristic(this.platform.Characteristic.On, true)
+   * Handle requests to set the "Active" characteristic.
    */
-  async getOn(): Promise<CharacteristicValue> {
-    // implement your own code to check if the device is on
-    const isOn = this.exampleStates.On;
+  handleOnSet(value, callback) {
+    this.platform.log.debug(`Triggered SET On: ${value}`);
 
-    this.platform.log.debug('Get Characteristic On ->', isOn);
-
-    // if you need to return an error to show the device as "Not Responding" in the Home app:
-    // throw new this.platform.api.hap.HapStatusError(this.platform.api.hap.HAPStatus.SERVICE_COMMUNICATION_FAILURE);
-
-    return isOn;
+    // const actionValue = value ? YamahaActionValue.ON : YamahaActionValue.STANDBY;
+    // this.platform.yamahaAVRAPI.postReceiverSetAction(YamahaAction.POWER, actionValue, this.isZoneB).then(() => {
+    //   callback(null);
+    // });
   }
 
   /**
-   * Handle "SET" requests from HomeKit
-   * These are sent when the user changes the state of an accessory, for example, changing the Brightness
+   * Handle requests to get the current value of the "RotationSpeed" characteristic.
+   * Rotation speed is used to control the volume.
    */
-  async setBrightness(value: CharacteristicValue) {
-    // implement your own code to set the brightness
-    this.exampleStates.Brightness = value as number;
+  handleRotationSpeedGet(callback) {
+    this.platform.log.debug('Triggered GET RotationSpeed');
 
-    this.platform.log.debug('Set Characteristic Brightness -> ', value);
+    // this.platform.yamahaAVRAPI.postReceiverGetAction(YamahaAction.VOLUME_GET, this.isZoneB).then((answer) => {
+    //   const currentVolume = parseInt(answer.Val);
+
+    //   // To calculate a percentage (0 - 100) of volume we do ((current - minimum) / (maximum - minimum)).
+    //   let volume = ((currentVolume - this.platform.minVolume) / (this.platform.maxVolume - this.platform.minVolume)) * 100;
+    //   volume = Math.round(volume);
+
+    //   callback(null, volume);
+    // });
   }
 
+  /**
+   * Handle requests to set the "RotationSpeed" characteristic.
+   * Rotation speed is used to control the volume.
+   */
+  handleRotationSpeedSet(value, callback) {
+    this.platform.log.debug(`Triggered SET RotationSpeed: ${value}`);
+
+    // We need to translate from 0 - 100 to our receiver's scale.
+    // We do this by: minimum + ((maximum - minimum) * (value / 100))
+    // Then we devide by 10, round and multiply by 10 again. This is done since -301 is not a valid number (should be -300 or -305).
+    // let volume = this.platform.minVolume + ((this.platform.maxVolume - this.platform.minVolume) * (value / 100));
+    // volume = Math.round(volume / 10) * 10;
+
+    // this.platform.yamahaAVRAPI.postReceiverSetAction(YamahaAction.VOLUME_SET_VALUE, volume, this.isZoneB).then(() => {
+    //   callback(null);
+    // });
+  }
 }

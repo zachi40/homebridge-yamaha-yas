@@ -11,7 +11,7 @@
         "required": true,
         "default": "Yamaha YAS-209"
       },
-      "ip": {
+      "receiverIP": {
         "title": "IP Address",
         "type": "string",
         "required": true,

@@ -1,4 +1,4 @@
-export interface YamahaAPI {
+export interface Yamahatypes {
     getBasicInfo: () => Promise<{
       getVolume: () => number;
       getCurrentInput: () => string;
