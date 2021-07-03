@@ -1,9 +1,9 @@
 {
   "private": true,
-  "displayName": "Yamaha YAS200 SoundBar",
-  "name": "homebridge-yamaha-yas209",
-  "version": "1.0.0",
-  "description": "A short description about what your plugin does.",
+  "displayName": "Yamaha YAS SoundBar",
+  "name": "homebridge-yamaha-yas",
+  "version": "1.0.1",
+  "description": "homebridge plugin for Yamaha yas-209 sound bar base on linkplay.",
   "license": "Apache-2.0",
   "repository": {
     "type": "git",
@@ -19,8 +19,8 @@
   "main": "dist/index.js",
   "scripts": {
     "lint": "eslint src/**.ts --max-warnings=0",
-    "watch": "npm run build && npm link && nodemon && cp certificate.p12 dist",
-    "build": "rimraf ./dist && tsc && cp certificate.p12 dist",
+    "watch": "npm run build && npm link && nodemon && copy certificate.p12 dist",
+    "build": "rimraf ./dist && tsc && copy certificate.p12 dist",
     "prepublishOnly": "npm run lint && npm run build"
   },
   "keywords": [

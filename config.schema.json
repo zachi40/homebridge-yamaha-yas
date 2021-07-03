@@ -1,21 +1,26 @@
 {
-  "pluginAlias": "YamahaYAS209",
+  "pluginAlias": "YamahaYAS",
   "pluginType": "platform",
   "singular": true,
+  "headerDisplay": "homebridge-yamaha-yas: Nearly complete HomeKit support for WLED. See the [Github project page](https://github.com/zachi40/homebridge-yamaha-yas) for more documentation.",
+    "footerDisplay": "",
   "schema": {
     "type": "object",
     "properties": {
       "name": {
         "title": "Name",
+        "description": "Name for this SoundBar",
         "type": "string",
         "required": true,
-        "default": "Yamaha YAS-209"
+        "placeholder": "Enter SoundBar name"
       },
       "receiverIP": {
         "title": "IP Address",
+        "description": "IP address for SoundBar.",
+        "format": "ipv4",
         "type": "string",
-        "required": true,
-        "default": ""
+        "placeholder": "Enter the IP address",
+        "required": true
       }
     }
   }

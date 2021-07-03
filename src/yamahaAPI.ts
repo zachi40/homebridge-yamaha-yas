@@ -3,30 +3,14 @@ import request from 'request';
 import { Logger } from 'homebridge';
 
 
-export enum YamahaAction {
-    POWER = 'POWER',
-    VOLUME_SET_UP_DOWN = 'VOLUME_SET_UP_DOWN',
-    VOLUME_SET_VALUE = 'VOLUME_SET_VALUE',
-    VOLUME_GET = 'VOLUME_GET',
-    MUTE = 'MUTE'
-}
-
-enum YamahaCommand {
-    SET = 'PUT',
-    GET = 'GET',
-    POST = 'POST'
-}
-
-export class YamahaAVAPI{
+export class YamahaAPI{
     private readonly p12location = __dirname + '/certificate.p12';
     private readonly p12password = 'Link2018qpwo';
-    baseUrl: string;
-    logger: Logger;
-    linkplayUrl: string;
+    private readonly baseUrl: string;
+    private readonly logger: Logger;
 
-    constructor(receiverIP: string, logger: Logger, zoneBName?: string) {
-      this.baseUrl = 'https://' + receiverIP + '/httpapi.asp?command=';
-      this.linkplayUrl = 'https://' + receiverIP + '/httpapi.asp?command=';
+    constructor(receiverIP: string, logger: Logger) {
+      this.baseUrl = `https://${receiverIP}/httpapi.asp?command=`;
       this.logger = logger;
     }
 
@@ -35,23 +19,42 @@ export class YamahaAVAPI{
       const options = {
         url: this.baseUrl+command,
         rejectUnauthorized: false,
-        headers: {
-          'content-type': 'application/json',
-        },
         agentOptions: {
-          pfx: fs.readFileSync(__dirname + '/certificate.p12'),
-          passphrase: 'Link2018qpwo',
+          pfx: fs.readFileSync(this.p12location),
+          passphrase: this.p12password,
         },
       };
-      request.get(options, (error, response, body) => {
-        return body;
+
+      return new Promise<string>(callback => {
+        request.get(options, (error, response, body) => {
+          callback(body);
+        });
       });
     }
 
-    public postReceiverGetStatus() {
-      return new Promise<any>((resolve) => {
-        const data = this.buildRequestData('YAMAHA_DATA_GET') || '';
-        resolve(data);
-      });
+    public async getStatus() {
+      return JSON.parse(await this.buildRequestData('getStatusEx'));
     }
+
+    public async getPower() {
+      // eslint-disable-next-line no-async-promise-executor
+      const data = JSON.parse(await this.buildRequestData('YAMAHA_DATA_GET'));
+      this.logger.debug(`Get power state: ${data['power saving']}`);
+      return data['power saving'];
+    }
+
+    public async setPower(value ) {
+      this.logger.debug(`Set power state: ${value}`);
+      if (value){
+        //powerOn
+        await this.buildRequestData('YAMAHA_DATA_SET%3a{"power+saving"%3a"1"}');
+        this.logger.debug('Poweron');
+
+      } else {
+        //powerOff
+        await this.buildRequestData('YAMAHA_DATA_SET%3a{"power+saving"%3a"0"}');
+        this.logger.debug('Poweroff');
+      }
+    }
+
 }
