@@ -39,11 +39,32 @@ export class YamahaAPI{
     public async getPower() {
       // eslint-disable-next-line no-async-promise-executor
       const data = JSON.parse(await this.buildRequestData('YAMAHA_DATA_GET'));
-      this.logger.debug(`Get power state: ${data['power saving']}`);
+      this.logger.debug(`Get Power State: ${data['power saving']}`);
       return data['power saving'];
     }
 
     public async setPower(value ) {
+      this.logger.debug(`Set Power State: ${value}`);
+      if (value){
+        //powerOn
+        await this.buildRequestData('YAMAHA_DATA_SET%3a{"power+saving"%3a"1"}');
+        this.logger.debug('Turned On');
+
+      } else {
+        //powerOff
+        await this.buildRequestData('YAMAHA_DATA_SET%3a{"power+saving"%3a"0"}');
+        this.logger.debug('Turned OFF');
+      }
+    }
+
+    public async getMute() {
+      // eslint-disable-next-line no-async-promise-executor
+      const data = JSON.parse(await this.buildRequestData('YAMAHA_DATA_GET'));
+      this.logger.debug(`Get Mute State: ${data['power saving']}`);
+      return data['power saving'];
+    }
+
+    public async setMute(value ) {
       this.logger.debug(`Set power state: ${value}`);
       if (value){
         //powerOn

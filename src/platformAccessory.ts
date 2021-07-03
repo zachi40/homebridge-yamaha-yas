@@ -1,4 +1,4 @@
-import { PlatformAccessory, Service, Logger} from 'homebridge';
+import { PlatformAccessory, Service, Logger, CharacteristicValue, CharacteristicSetCallback} from 'homebridge';
 import { YamahaYasPlatform } from './platform';
 import { YamahaAPI } from './yamahaAPI';
 
@@ -10,6 +10,7 @@ export class Yamahaaccessory {
 
   //services
   SwitchService: Service;
+  speakerService: Service ;
 
   constructor(platform, accessory) {
     this.platform = platform;
@@ -27,18 +28,38 @@ export class Yamahaaccessory {
       accessory.getService(this.platform.Service.Switch) ||
       accessory.addService(this.platform.Service.Switch);
 
-    this.SwitchService.setCharacteristic(this.platform.Characteristic.Name, 'Power');
-    this.SwitchService.getCharacteristic(this.platform.Characteristic.On)
-      .onGet(this.getPower.bind(this))
-      .onSet(this.setPower.bind(this));
+    this.SwitchService
+      .setCharacteristic(this.platform.Characteristic.Name, 'Power')
+      .getCharacteristic(this.platform.Characteristic.On)
+      .onGet(this.handleGetPower.bind(this))
+      .onSet(this.handleSetPower.bind(this));
+
+    this.speakerService =accessory.getService(this.platform.Service.TelevisionSpeaker) ||
+     this.accessory.addService(this.platform.Service.TelevisionSpeaker);
+
+    this.speakerService
+      .setCharacteristic(this.platform.Characteristic.Active, this.platform.Characteristic.Active.ACTIVE)
+      .setCharacteristic(this.platform.Characteristic.VolumeControlType, this.platform.Characteristic.VolumeControlType.ABSOLUTE);
+
+    // handle volume control
+    this.speakerService.getCharacteristic(this.platform.Characteristic.VolumeSelector)
+      .on('set', (direction: CharacteristicValue, callback: CharacteristicSetCallback) => {
+        this.setVolume(direction, callback);
+      });
+
 
   }
 
-  async getPower() {
+  async handleGetPower() {
     return await this.yamahaapi.getPower();
   }
 
-  setPower(value) {
+  handleSetPower(value) {
     this.yamahaapi.setPower(value);
+  }
+
+  setVolume(direction: CharacteristicValue, callback: CharacteristicSetCallback) {
+    const d = direction;
+    this.log.debug('a');
   }
 }

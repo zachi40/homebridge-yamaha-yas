@@ -2,7 +2,7 @@
   "pluginAlias": "YamahaYAS",
   "pluginType": "platform",
   "singular": true,
-  "headerDisplay": "homebridge-yamaha-yas: Nearly complete HomeKit support for WLED. See the [Github project page](https://github.com/zachi40/homebridge-yamaha-yas) for more documentation.",
+  "headerDisplay": "homebridge-yamaha-yas: Nearly complete HomeKit support for Yamaha Yas SoundBar. See the [Github project page](https://github.com/zachi40/homebridge-yamaha-yas) for more documentation.",
     "footerDisplay": "",
   "schema": {
     "type": "object",
