@@ -1,6 +1,6 @@
 {
   "private": true,
-  "displayName": "Yamaha YAS SoundBar",
+  "displayName": "Yamaha YAS SoundBar1",
   "name": "homebridge-yamaha-yas",
   "version": "1.0.1",
   "description": "homebridge plugin for Yamaha yas-209 sound bar base on linkplay.",
