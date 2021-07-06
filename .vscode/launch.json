@@ -5,10 +5,11 @@
     "version": "0.2.0",
     "configurations": [
 
+
         {
             "name": "Launch Program",
             "program": "c:\\Users\\home\\AppData\\Roaming\\npm\\node_modules\\homebridge\\bin\\homebridge", 
-            "args": ["-D"],
+            "args": ["-D", "-I"],
             "request": "launch",
             "skipFiles": [
                 "<node_internals>/**"

@@ -1,10 +1,10 @@
-import { API, DynamicPlatformPlugin, Logger, PlatformAccessory, PlatformConfig, Service, Characteristic} from 'homebridge';
+import { API, IndependentPlatformPlugin, Logger, PlatformAccessory, PlatformConfig, Service, Characteristic} from 'homebridge';
 import { Yamahaaccessory } from './platformAccessory';
 import { YamahaAPI} from './yamahaAPI';
 import { PLATFORM_NAME, PLUGIN_NAME } from './settings';
 
 
-export class YamahaYasPlatform implements DynamicPlatformPlugin {
+export class YamahaYasPlatform implements IndependentPlatformPlugin {
   public readonly Service: typeof Service = this.api.hap.Service;
   public readonly Characteristic: typeof Characteristic = this.api.hap.Characteristic;
   private readonly receiverIP: string;
@@ -26,6 +26,7 @@ export class YamahaYasPlatform implements DynamicPlatformPlugin {
     });
   }
 
+
   configureAccessory(accessory: PlatformAccessory) {
     this.log.info('Loading accessory from cache:', accessory.displayName);
     this.accessories.push(accessory);
@@ -38,12 +39,12 @@ export class YamahaYasPlatform implements DynamicPlatformPlugin {
         const existingAccessory = this.accessories.find(accessory => accessory.UUID === uuid);
         if (existingAccessory) {
           this.log.info('Restoring existing accessory from cache:', existingAccessory.displayName);
-          new Yamahaaccessory(this, existingAccessory);
+          new Yamahaaccessory(this, existingAccessory, this.config);
         } else {
           this.log.info('Adding new accessory:', data['DeviceName']);
           const accessory = new this.api.platformAccessory( data['DeviceName'], uuid);
           accessory.context.device = data;
-          new Yamahaaccessory(this, accessory);
+          new Yamahaaccessory(this, accessory, this.config);
           this.api.registerPlatformAccessories(PLUGIN_NAME, PLATFORM_NAME, [accessory]);
         }
       } else {

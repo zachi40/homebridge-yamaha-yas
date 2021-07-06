@@ -3,7 +3,7 @@
   "pluginType": "platform",
   "singular": true,
   "headerDisplay": "homebridge-yamaha-yas: Nearly complete HomeKit support for Yamaha Yas SoundBar. See the [Github project page](https://github.com/zachi40/homebridge-yamaha-yas) for more documentation.",
-    "footerDisplay": "",
+  "footerDisplay": "",
   "schema": {
     "type": "object",
     "properties": {
